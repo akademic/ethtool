@@ -51,6 +51,8 @@ const (
 	ETH_SS_STATS    = 1
 	ETH_SS_FEATURES = 4
 
+	ETHTOOL_LINK_MODE_MASK_MAX_KERNEL_NU32 = 127
+
 	// CMD supported
 	ETHTOOL_GDRVINFO = 0x00000003 /* Get driver info. */
 	ETHTOOL_GSTRINGS = 0x0000001b /* get specified string set */
@@ -74,6 +76,8 @@ const (
 	ETHTOOL_GFLAGS        = 0x00000025 /* Get flags bitmap(ethtool_value) */
 	ETHTOOL_GSSET_INFO    = 0x00000037 /* Get string set info */
 	ETHTOOL_GET_TS_INFO   = 0x00000041 /* Get time stamping and PHC info */
+	ETHTOOL_GLINKSETTINGS = 0x0000004c /* Get ethtool_link_settings */
+	ETHTOOL_SLINKSETTINGS = 0x0000004d /* Set ethtool_link_settings */
 )
 
 // MAX_GSTRINGS maximum number of stats entries that ethtool can
