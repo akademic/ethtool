@@ -38,6 +38,15 @@ func (ecmd *EthtoolLinkSettings) CmdGet(intf string) error {
 	return e.CmdGetLinkSetting(ecmd, intf)
 }
 
+func (ecmd *EthtoolLinkSettings) CmdSet(intf string) error {
+	e, err := NewEthtool()
+	if err != nil {
+		return err
+	}
+	defer e.Close()
+	return e.CmdSetLinkSetting(ecmd, intf)
+}
+
 func (ecmd *EthtoolLinkSettings) ParseNegotiations() (*EthtoolLinkNegotiations, error) {
 	if ecmd.Cmd != ETHTOOL_GLINKSETTINGS {
 		return nil, errors.New("must CmdGet before parsing")
@@ -64,6 +73,39 @@ func (ecmd *EthtoolLinkSettings) ParseNegotiations() (*EthtoolLinkNegotiations, 
 	negotiations.LpAdvertising = (nego << 32) | uint64(ecmd.Link_mode_masks[offset])
 
 	return negotiations, nil
+}
+
+func (ecmd *EthtoolLinkSettings) SetNegotiation(negotiations *EthtoolLinkNegotiations) error {
+	if ecmd.Cmd != ETHTOOL_GLINKSETTINGS {
+		return errors.New("must CmdGet before parsing")
+	}
+
+	if ecmd.Link_mode_masks_nwords <= 0 {
+		return errors.New("nwords not set")
+	}
+
+	l := uint32(negotiations.Supported & uint64(^uint32(0)))
+	h := uint32(negotiations.Supported >> 32)
+
+	offset := 0
+	ecmd.Link_mode_masks[offset] = l
+	ecmd.Link_mode_masks[offset+1] = h
+
+	l = uint32(negotiations.Advertising & uint64(^uint32(0)))
+	h = uint32(negotiations.Advertising >> 32)
+
+	offset += int(ecmd.Link_mode_masks_nwords)
+	ecmd.Link_mode_masks[offset] = l
+	ecmd.Link_mode_masks[offset+1] = h
+
+	l = uint32(negotiations.LpAdvertising & uint64(^uint32(0)))
+	h = uint32(negotiations.LpAdvertising >> 32)
+
+	offset += int(ecmd.Link_mode_masks_nwords)
+	ecmd.Link_mode_masks[offset] = l
+	ecmd.Link_mode_masks[offset+1] = h
+
+	return nil
 }
 
 // CmdGetLinkSetting returns the interface settings in the receiver struct
